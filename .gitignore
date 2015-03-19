@@ -1,0 +1,9 @@
+asamahe/web/
+bin/
+gowiki/
+pkg/
+src/*
+!src/asamahe/
+!src/sunaryo/
+src/sunaryo/util/security/crypto.go
+test/
