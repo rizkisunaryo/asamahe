@@ -194,6 +194,7 @@ func joke(w http.ResponseWriter, r *http.Request) {
 
 	jsStr, _ := json.Marshal(jokeOutput)
 	fmt.Fprintf(w, string(jsStr))
+	//	fmt.Fprintf(w, security.Unescape(string(jsStr)))
 }
 
 func searchByJokeIdReqJson(jokeId string) []byte {

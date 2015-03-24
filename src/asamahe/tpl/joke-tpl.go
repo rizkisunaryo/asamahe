@@ -8,6 +8,7 @@ import (
 	"sunaryo/util/sunhttp"
 	//	"sunaryo/util/template"
 	"log"
+	//	"sunaryo/util/security"
 )
 
 func JokesProcessTpl(w http.ResponseWriter, viewer string, b []byte) {
