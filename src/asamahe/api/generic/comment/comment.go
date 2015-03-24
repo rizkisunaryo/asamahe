@@ -24,58 +24,62 @@ func comment(w http.ResponseWriter, r *http.Request) {
 	var t structs.CommentInput
 	json.NewDecoder(r.Body).Decode(&t)
 
-	security.CheckKey(append([]byte(``), t.Key...), append([]byte(``), t.Commentator...))
+	if t.Commentator != "" && t.Key != "" && t.JokeId != "" && t.Comment != "" {
+		security.CheckKey(append([]byte(``), t.Key...), append([]byte(``), t.Commentator...))
 
-	c := make(chan string)
+		c := make(chan string)
 
-	// Insert comment
-	go func() {
-		url := "http://localhost:9200/asamahe/comment"
-		b := commentInputJsonTemplate(t.JokeId, security.Escape(t.Commentator), security.Escape(t.Comment), t.Long, t.Lat)
-		var respStruct structs.IdResponse
-		err := sunhttp.Post(url, b, &respStruct)
-		if err != nil {
-			log.Printf("\n%s", err)
-		} else {
-			fmt.Fprintf(w, "{\"Status\":0,\"Id\":\"%s\"}", respStruct.Id)
-		}
-		c <- "insert comment"
-	}()
+		// Insert comment
+		go func() {
+			url := "http://localhost:9200/asamahe/comment"
+			b := commentInputJsonTemplate(t.JokeId, security.Escape(t.Commentator), security.Escape(t.Comment), t.Long, t.Lat)
+			var respStruct structs.IdResponse
+			err := sunhttp.Post(url, b, &respStruct)
+			if err != nil {
+				log.Printf("\n%s", err)
+			} else {
+				fmt.Fprintf(w, "{\"Status\":0,\"Id\":\"%s\"}", respStruct.Id)
+			}
+			c <- "insert comment"
+		}()
 
-	// Add CommentCount and Score
-	go func() {
-		url2 := ("http://localhost:9200/asamahe/joke/" + t.JokeId + "/_update")
-		addCommentCountReq := []byte(`{"script" : "ctx._source.CommentCount+=1"}`)
-		err := sunhttp.PostNoResponse(url2, addCommentCountReq)
-		if err != nil {
-			log.Printf("\n%s", err)
-		}
-
-		// Get Joke
-		// The intention is to get the Joker
-		urlGetJoke := ("http://localhost:9200/asamahe/joke/" + t.JokeId)
-		var jokeRespStruct structs.JokeResponse
-		err2 := sunhttp.GetResponse(urlGetJoke, &jokeRespStruct)
-		if err2 != nil {
-			log.Printf("\n%s", err2)
-			// Check whether the Commentator is not the Joker itself
-		} else if jokeRespStruct.Source.Joker != t.Commentator {
-			// If not the Joker itself,
-			// add Score by 3
-			urlAddScore := ("http://localhost:9200/asamahe/joke/" + t.JokeId + "/_update")
-			addScoreReq := []byte(`{"script" : "ctx._source.Score+=3"}`)
-
-			err := sunhttp.PostNoResponse(urlAddScore, addScoreReq)
+		// Add CommentCount and Score
+		go func() {
+			url2 := ("http://localhost:9200/asamahe/joke/" + t.JokeId + "/_update")
+			addCommentCountReq := []byte(`{"script" : "ctx._source.CommentCount+=1"}`)
+			err := sunhttp.PostNoResponse(url2, addCommentCountReq)
 			if err != nil {
 				log.Printf("\n%s", err)
 			}
-		}
-		c <- "Add CommentCount and Score"
-	}()
 
-	for i1 := 0; i1 < 2; i1++ {
-		//		fmt.Printf("%s\n", <-c)
-		<-c
+			// Get Joke
+			// The intention is to get the Joker
+			urlGetJoke := ("http://localhost:9200/asamahe/joke/" + t.JokeId)
+			var jokeRespStruct structs.JokeResponse
+			err2 := sunhttp.GetResponse(urlGetJoke, &jokeRespStruct)
+			if err2 != nil {
+				log.Printf("\n%s", err2)
+				// Check whether the Commentator is not the Joker itself
+			} else if jokeRespStruct.Source.Joker != t.Commentator {
+				// If not the Joker itself,
+				// add Score by 3
+				urlAddScore := ("http://localhost:9200/asamahe/joke/" + t.JokeId + "/_update")
+				addScoreReq := []byte(`{"script" : "ctx._source.Score+=3"}`)
+
+				err := sunhttp.PostNoResponse(urlAddScore, addScoreReq)
+				if err != nil {
+					log.Printf("\n%s", err)
+				}
+			}
+			c <- "Add CommentCount and Score"
+		}()
+
+		for i1 := 0; i1 < 2; i1++ {
+			//		fmt.Printf("%s\n", <-c)
+			<-c
+		}
+	} else {
+		fmt.Fprintf(w, "{\"Status\":1}")
 	}
 }
 

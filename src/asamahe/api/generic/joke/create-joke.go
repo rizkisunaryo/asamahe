@@ -23,17 +23,21 @@ func createJoke(w http.ResponseWriter, r *http.Request) {
 	var t structs.CreateJokeInput
 	json.NewDecoder(r.Body).Decode(&t)
 
-	security.CheckKey(append([]byte(``), t.Key...), append([]byte(``), t.Joker...))
+	if t.Joker != "" && t.Key != "" && t.Content != "" {
+		security.CheckKey(append([]byte(``), t.Key...), append([]byte(``), t.Joker...))
 
-	url := "http://localhost:9200/asamahe/joke"
-	// fmt.Printf(security.Escape(t.Content))
-	b := createJokeInputJsonTemplate(t.Joker, security.Escape(t.Title), security.Escape(t.Content), t.Long, t.Lat)
-	var respStruct structs.CreateJokeResponse
-	succFn := func() {
-		fmt.Fprintf(w, "{\"Status\":0,\"Id\":\"%s\"}", respStruct.Id)
+		url := "http://localhost:9200/asamahe/joke"
+		// fmt.Printf(security.Escape(t.Content))
+		b := createJokeInputJsonTemplate(t.Joker, security.Escape(t.Title), security.Escape(t.Content), t.Long, t.Lat)
+		var respStruct structs.CreateJokeResponse
+		succFn := func() {
+			fmt.Fprintf(w, "{\"Status\":0,\"Id\":\"%s\"}", respStruct.Id)
+		}
+		err := sunhttp.Post(url, b, &respStruct)
+		template.IfError(err, w, 1, succFn)
+	} else {
+		fmt.Fprintf(w, "{\"Status\":1}")
 	}
-	err := sunhttp.Post(url, b, &respStruct)
-	template.IfError(err, w, 1, succFn)
 }
 
 func createJokeInputJsonTemplate(joker string, title string, content string, long float64, lat float64) []byte {
