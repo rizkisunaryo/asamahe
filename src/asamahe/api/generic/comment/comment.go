@@ -24,7 +24,7 @@ func comment(w http.ResponseWriter, r *http.Request) {
 	var t structs.CommentInput
 	json.NewDecoder(r.Body).Decode(&t)
 
-	if t.Commentator != "" && t.Key != "" && t.JokeId != "" && t.Comment != "" {
+	if t.Commentator != "" && t.Key != "" && t.JokeId != "" && t.Comment != "" && len(t.Comment) <= 3072 {
 		security.CheckKey(append([]byte(``), t.Key...), append([]byte(``), t.Commentator...))
 
 		c := make(chan string)

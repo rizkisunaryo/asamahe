@@ -23,7 +23,7 @@ func createJoke(w http.ResponseWriter, r *http.Request) {
 	var t structs.CreateJokeInput
 	json.NewDecoder(r.Body).Decode(&t)
 
-	if t.Joker != "" && t.Key != "" && t.Content != "" {
+	if t.Joker != "" && t.Key != "" && t.Content != "" && len(t.Content) <= 163840 && len(t.Title) <= 1024 {
 		security.CheckKey(append([]byte(``), t.Key...), append([]byte(``), t.Joker...))
 
 		url := "http://localhost:9200/asamahe/joke"
