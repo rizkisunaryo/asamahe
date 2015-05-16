@@ -47,7 +47,7 @@ func searchNewJokesReqJsonTpl(timestamp string, isBefore int) []byte {
 		comparison, order = "lte", "desc"
 	}
 
-	b := []byte(`{"query":{"filtered":{"query":{"match":{"IsBlocked":0}},"filter":{"numeric_range":{"Time":{"`)
+	b := []byte(`{"query":{"filtered":{"query":{"match":{"IsBlocked":0}},"filter":{"numeric_range":{"UpdateTime":{"`)
 	b = append(b, comparison...)
 	b = append(b, []byte(`":"`)...)
 	if timestamp == "" {
@@ -56,7 +56,7 @@ func searchNewJokesReqJsonTpl(timestamp string, isBefore int) []byte {
 	} else {
 		b = append(b, timestamp...)
 	}
-	b = append(b, []byte(`"}}}}},"sort":[{"Time":{"order":"`)...)
+	b = append(b, []byte(`"}}}}},"sort":[{"UpdateTime":{"order":"`)...)
 	b = append(b, order...)
 	b = append(b, []byte(`"}}],"from":0,"size":20}`)...)
 

@@ -17,6 +17,8 @@ func HandleHotJokes() {
 }
 
 func hotJokes(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	var inp structs.HotJokesInput
 	json.NewDecoder(r.Body).Decode(&inp)
 

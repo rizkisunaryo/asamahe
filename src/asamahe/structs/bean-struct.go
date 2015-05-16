@@ -26,6 +26,7 @@ type Joke struct {
 	IsAd         int
 	IsBlocked    int
 	Time         string
+	UpdateTime   string
 }
 
 type Comment struct {

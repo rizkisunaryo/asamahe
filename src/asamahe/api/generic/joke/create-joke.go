@@ -20,6 +20,8 @@ func HandleCreateJoke() {
 func createJoke(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
+	//	security.Escape(r.Body)
+
 	var t structs.CreateJokeInput
 	json.NewDecoder(r.Body).Decode(&t)
 
@@ -59,7 +61,10 @@ func createJokeInputJsonTemplate(joker string, title string, content string, lon
         "IsBlocked":0,
         "Time":"`)...)
 	tm := time.Now().Local()
-	b = append(b, tm.Format("2006/01/02 15:04:05.000")...)
+	theTime := tm.Format("2006/01/02 15:04:05.000")
+	b = append(b, theTime...)
+	b = append(b, []byte(`","UpdateTime":"`)...)
+	b = append(b, theTime...)
 	if long != 0.0 || lat != 0.0 {
 		b = append(b, []byte(`","Geo":{"Loc":[`)...)
 		b = append(b, util.FloatToString(long)...)

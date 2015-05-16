@@ -43,7 +43,7 @@ func comment(w http.ResponseWriter, r *http.Request) {
 			c <- "insert comment"
 		}()
 
-		// Add CommentCount and Score
+		// Add CommentCount, Score and Change UpdateTime
 		go func() {
 			url2 := ("http://localhost:9200/asamahe/joke/" + t.JokeId + "/_update")
 			addCommentCountReq := []byte(`{"script" : "ctx._source.CommentCount+=1"}`)
@@ -58,19 +58,37 @@ func comment(w http.ResponseWriter, r *http.Request) {
 			var jokeRespStruct structs.JokeResponse
 			err2 := sunhttp.GetResponse(urlGetJoke, &jokeRespStruct)
 			if err2 != nil {
+				//				log.Printf("1")
 				log.Printf("\n%s", err2)
-				// Check whether the Commentator is not the Joker itself
-			} else if jokeRespStruct.Source.Joker != t.Commentator {
-				// If not the Joker itself,
-				// add Score by 3
-				urlAddScore := ("http://localhost:9200/asamahe/joke/" + t.JokeId + "/_update")
-				addScoreReq := []byte(`{"script" : "ctx._source.Score+=3"}`)
+			} else {
+				changeUpdateTimeUrl := "http://localhost:9200/asamahe/joke/" + t.JokeId + "/_update"
+				changeUpdateTimeReq := []byte(`{"doc":{"UpdateTime":"`)
+				tm := time.Now().Local()
+				changeUpdateTimeReq = append(changeUpdateTimeReq, tm.Format("2006/01/02 15:04:05.000")...)
+				changeUpdateTimeReq = append(changeUpdateTimeReq, []byte(`"}}`)...)
+				err3 := sunhttp.PostNoResponse(changeUpdateTimeUrl, changeUpdateTimeReq)
+				if err3 != nil {
+					log.Printf("\n%s", err3)
+				}
+				//				log.Printf(changeUpdateTimeUrl)
+				//				log.Printf(string(changeUpdateTimeReq))
 
-				err := sunhttp.PostNoResponse(urlAddScore, addScoreReq)
-				if err != nil {
-					log.Printf("\n%s", err)
+				// Check whether the Commentator is not the Joker itself
+				if jokeRespStruct.Source.Joker != t.Commentator {
+					log.Printf("3")
+					// If not the Joker itself,
+					// add Score by 3
+					urlAddScore := ("http://localhost:9200/asamahe/joke/" + t.JokeId + "/_update")
+					addScoreReq := []byte(`{"script" : "ctx._source.Score+=3"}`)
+
+					err := sunhttp.PostNoResponse(urlAddScore, addScoreReq)
+					if err != nil {
+						log.Printf("\n%s", err)
+					}
 				}
 			}
+			//			log.Printf("4")
+
 			c <- "Add CommentCount and Score"
 		}()
 
