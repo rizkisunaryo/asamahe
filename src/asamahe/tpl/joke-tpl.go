@@ -8,14 +8,14 @@ import (
 	"sunaryo/util/sunhttp"
 	//	"sunaryo/util/template"
 	"log"
-	//	"sunaryo/util/security"
+	"sunaryo/util/security"
 )
 
 func JokesProcessTpl(w http.ResponseWriter, viewer string, b []byte) {
 	//	var nJokesOutput structs.JokesOutput
 	nJokesOutput := JokesGetFromESProcessTpl(w, viewer, b)
 	jsStr, _ := json.Marshal(nJokesOutput)
-	fmt.Fprintf(w, string(jsStr))
+	fmt.Fprintf(w, security.EscapeForHtml(string(jsStr)))
 }
 
 func JokerJokesProcessTpl(w http.ResponseWriter, viewer string, b []byte, joker string) {
@@ -50,7 +50,7 @@ func JokerJokesProcessTpl(w http.ResponseWriter, viewer string, b []byte, joker 
 	}
 
 	jsStr, _ := json.Marshal(jokerJokes)
-	fmt.Fprintf(w, string(jsStr))
+	fmt.Fprintf(w, security.EscapeForHtml(string(jsStr)))
 }
 
 func JokesGetFromESProcessTpl(w http.ResponseWriter, viewer string, b []byte) structs.JokesOutput {

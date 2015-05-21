@@ -20,17 +20,8 @@ func Escape(theString string) string {
 	return s
 }
 
-func Unescape(theString string) string {
-	s := strings.Replace(theString, "\\u0026lt;div", "<div", -1)
-	s = strings.Replace(s, "\\u0026lt;/div", "</div", -1)
-	s = strings.Replace(s, "\\u0026lt;a", "<a", -1)
-	s = strings.Replace(s, "\\u0026lt;/a", "</a", -1)
-	s = strings.Replace(s, "\\u0026lt;img src=\\u0026#34;data", "<img src=\\u0022data", -1)
-	s = strings.Replace(s, "\\u0026lt;br", "<br", -1)
-	s = strings.Replace(s, "\\u0026#34;\\u003e", "\\u0022>", -1)
-
-	//	fmt.Printf("\n\n\\u0026lt;br")
-	//	fmt.Printf("\n\n%s", s)
+func EscapeForHtml(theString string) string {
+	s := strings.Replace(theString, "%", "\\u0025", -1)
 
 	return s
 }
